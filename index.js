@@ -1,50 +1,13 @@
+const userRoutes = require("./src/routes/userRoutes");
 const express = require("express");
 const app = express();
+const morgan = require("morgan");
 
-const users = [
-  {
-    userId: 1,
-    name: "Muhammad Faizan",
-  },
+// Global Middlewares
+app.use(morgan('dev'));
 
-  {
-    userId: 2,
-    name: "Muhammad Ali",
-  },
-
-  {
-    userId: 3,
-    name: "Ali Abdullah",
-  },
-];
-
-app.get("/", (req, res) => {
-  return res.send({
-    message: "Welcome to the application",
-  });
-});
-
-app.post("/about", (req, res) => {
-  return res.send({
-    name: "Muhammad Faizan",
-    email: "muhammadfaizan027915@gmail.com",
-  });
-});
-
-app.get("/users", (req, res) => {
-  return res.send(users);
-});
-
-app.get("/users/:userId", (req, res) => {
-  const { userId } = req.params;
-  const foundUser = users.find((user) => user.userId == userId);
-
-  if (foundUser) res.send(foundUser);
-
-  res.send({
-    message: "Required user not found",
-  });
-});
+// Routes
+app.use(userRoutes);
 
 const Port = 5000;
 app.listen(Port, () => console.log("Server started...." + Port));
