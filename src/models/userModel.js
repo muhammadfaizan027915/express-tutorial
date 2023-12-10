@@ -7,11 +7,16 @@ const userSchema = new Schema({
   },
   email: {
     type: String,
+    unique: true,
     required: true,
     max: 30,
   },
   phone: Number,
-  address: [{ type: String }],
+  addresses: [{ type: Schema.Types.ObjectId, ref: "Address" }],
+  password: {
+    type: String,
+    required: true,
+  },
   status: {
     type: Boolean,
     default: false,

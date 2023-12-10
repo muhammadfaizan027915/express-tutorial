@@ -1,22 +1,12 @@
-const users = [
-  {
-    userId: 1,
-    name: "Muhammad Faizan",
-  },
+const bcrypt = require("bcrypt");
+const UserModel = require("../models/userModel");
+const AddressModel = require("../models/addressModel");
 
-  {
-    userId: 2,
-    name: "Muhammad Ali",
-  },
+const getUsers = async (req, res) => {
+  const users = await UserModel.find({}, "-password -__v");
+  if (!users?.length) return res.status(404).send({ statusCode: 404, message: "No user found!" });
 
-  {
-    userId: 3,
-    name: "Ali Abdullah",
-  },
-];
-
-const getUsers = (req, res) => {
-  return res.send(users);
+  return res.status(200).send({ users, message: "Users successfully found!" });
 };
 
 const getUserById = (req, res) => {
@@ -43,9 +33,40 @@ const greetUser = (req, res) => {
   });
 };
 
+const createUser = async (req, res) => {
+  try {
+    let { name, email, phone, addresses, password } = req.body;
+  
+    if (!name || !email || !password)
+      return res.status(400).send({ statusCode: 400, messsage: "Must provide the required fields!" });
+
+    if (await UserModel.exists({ email })) {
+      // const alreadyExistsUser = await UserModel.findOne({ email });
+      // if (alreadyExistsUser)
+      return res.status(400).send({ statusCode: 400, message: "Email already exists!" });
+    }
+
+    if (addresses?.length) {
+      const dbAddresses = await AddressModel.insertMany(addresses);
+      addresses = dbAddresses?.map((address) => address?._id);
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = new UserModel({ name, email, phone, addresses, password: hashedPassword,});
+
+    const dbUser = await user.save();
+    delete dbUser._doc.password;
+
+    return res.status(201).send({ user: dbUser, message: "Succesfully created an account!" });
+  } catch (error) {
+    res.status(500).send({ statusCode: 500, message: "Something went wrong!" });
+  }
+};
+
 module.exports = {
   getUsers,
   getUserById,
   greetUser,
   aboutUs,
+  createUser,
 };

@@ -1,11 +1,12 @@
 const userRoutes = require("./src/routes/userRoutes");
+const bodyParser = require("body-parser");
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 
 // Global Middlewares
-app.use(morgan("dev"));
+app.use([morgan("dev"), bodyParser.json()]);
 
 // Routes
 app.use(userRoutes);
